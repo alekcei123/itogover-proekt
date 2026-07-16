@@ -4,7 +4,7 @@ import './LoginModal.css';
 
 const LoginModal = ({ isOpen, onClose, onLogin }) => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState(''); // <-- добавили пароль
+  const [password, setPassword] = useState(''); 
   const [loginMessage, setLoginMessage] = useState('');
 
   const navigate = useNavigate();
@@ -29,7 +29,7 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }), // <-- отправляем email + password
+        body: JSON.stringify({ email, password }), 
       });
 
       const result = await response.json();
@@ -37,12 +37,12 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
       if (result.success) {
         setLoginMessage('Успешный вход!');
         
-        // Сохраняем данные пользователя (если нужно для UI)
+        
         onLogin({ email }); 
 
         // Переход на «Мой профиль» через 1.5 секунды
         setTimeout(() => {
-          navigate('/profile'); // <-- путь к твоему компоненту «Мой профиль»
+          navigate('/profile'); 
         }, 1500);
       } else {
         setLoginMessage(result.message || 'Ошибка входа: неверный email или пароль');
