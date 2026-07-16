@@ -8,7 +8,7 @@ function RegistrationForm() {
     password: '',
     confirmPassword: '',
     city: '',
-    gender: 'male', // ✅ Было '', стало 'male' по умолчанию
+    gender: 'male', 
     age: '',
     interests: '',
     about: ''
@@ -79,7 +79,7 @@ function RegistrationForm() {
       body: JSON.stringify(payload),
     });
 
-    // ✅ Читаем JSON ОДИН раз, сразу в переменную data
+  
     const data = await response.json().catch(() => ({
       success: false,
       message: 'Не удалось прочитать ответ сервера (невалидный JSON)'
@@ -87,13 +87,13 @@ function RegistrationForm() {
 
     console.log('ОТВЕТ ОТ PHP:', data);
 
-    // Проверяем успех именно по полю success из ответа PHP
+    
     if (!data.success) {
       setRegistrationMessage(data.message || 'Ошибка регистрации');
       return;
     }
 
-    // Если всё хорошо
+    
     localStorage.setItem('authToken', data.token);
     setRegistrationMessage('');
     alert(`Регистрация успешна! Добро пожаловать, ${formData.username}!`);
