@@ -29,7 +29,7 @@ export function TariffsPage() {
 
       const text = await response.text();
 
-      // Защита от HTML вместо JSON
+      
       if (text.trim().startsWith('<')) {
         console.error('Сервер вернул HTML вместо JSON:', text);
         throw new Error('Сервер вернул HTML вместо JSON. Проверьте URL и логи PHP.');
@@ -73,7 +73,7 @@ export function TariffsPage() {
           <p>Тарифы не найдены</p>
         ) : (
           tariffs.map((tariff) => {
-            // Исправляем key для фич: используем индекс только внутри карточки
+            
             const featuresList = Array.isArray(tariff.features)
               ? tariff.features.map((f, idx) => (
                   <li key={`${tariff.id}-feature-${idx}`}>{f}</li>
