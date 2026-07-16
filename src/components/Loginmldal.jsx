@@ -23,7 +23,7 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
     }
 
     try {
-      // Важно: порт должен совпадать с тем, где запущен PHP-сервер
+      
       const response = await fetch('http://localhost:8000/login.php', {
         method: 'POST',
         headers: {
@@ -40,7 +40,7 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
         
         onLogin({ email }); 
 
-        // Переход на «Мой профиль» через 1.5 секунды
+        
         setTimeout(() => {
           navigate('/profile'); 
         }, 1500);
