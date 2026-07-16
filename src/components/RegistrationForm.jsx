@@ -8,14 +8,14 @@ function RegistrationForm() {
     password: '',
     confirmPassword: '',
     city: '',
-    gender: '',
+    gender: 'male', // ✅ Было '', стало 'male' по умолчанию
     age: '',
     interests: '',
     about: ''
   });
   const [registrationMessage, setRegistrationMessage] = useState('');
-  const [previewImages, setPreviewImages] = useState([])
-  const [selectedFiles, setSelectedFiles] = useState([])
+  const [previewImages, setPreviewImages] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,76 +25,85 @@ function RegistrationForm() {
     }));
   };
 
-  // Обработка загрузки файлов
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     setSelectedFiles(files);
-
-    // Создаём URL для предпросмотра
     const imagePreviews = files.map(file => URL.createObjectURL(file));
     setPreviewImages(imagePreviews);
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    // Валидация
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setRegistrationMessage('Пожалуйста, введите корректный email');
+  // Простая валидация на клиенте
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(formData.email)) {
+    setRegistrationMessage('Пожалуйста, введите корректный email');
+    return;
+  }
+  if (formData.password !== formData.confirmPassword) {
+    setRegistrationMessage('Пароли не совпадают');
+    return;
+  }
+  if (formData.password.length < 6) {
+    setRegistrationMessage('Пароль должен содержать минимум 6 символов');
+    return;
+  }
+  if (!formData.username || !formData.city || !formData.gender || !formData.age) {
+    setRegistrationMessage('Заполните все обязательные поля');
+    return;
+  }
+
+  try {
+    // Формируем payload — здесь age никогда не будет NaN
+    const ageValue = formData.age ? parseInt(formData.age, 10) : 0;
+    
+    const payload = {
+      username: formData.username.trim(),
+      email: formData.email.trim(),
+      password: formData.password,
+      city: formData.city.trim(),
+      gender: formData.gender,
+      age: ageValue, // ✅ число или 0
+      interests: formData.interests.trim(),
+      about: formData.about.trim(),
+    };
+
+    console.log('ОТПРАВЛЯЕМ НА СЕРВЕР:', payload);
+
+    const response = await fetch('http://localhost/register.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    // ✅ Читаем JSON ОДИН раз, сразу в переменную data
+    const data = await response.json().catch(() => ({
+      success: false,
+      message: 'Не удалось прочитать ответ сервера (невалидный JSON)'
+    }));
+
+    console.log('ОТВЕТ ОТ PHP:', data);
+
+    // Проверяем успех именно по полю success из ответа PHP
+    if (!data.success) {
+      setRegistrationMessage(data.message || 'Ошибка регистрации');
       return;
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      setRegistrationMessage('Пароли не совпадают');
-      return;
-    }
+    // Если всё хорошо
+    localStorage.setItem('authToken', data.token);
+    setRegistrationMessage('');
+    alert(`Регистрация успешна! Добро пожаловать, ${formData.username}!`);
 
-    if (formData.password.length < 6) {
-      setRegistrationMessage('Пароль должен содержать минимум 6 символов');
-      return;
-    }
+  } catch (error) {
+    console.error('Ошибка сети (fetch):', error);
+    setRegistrationMessage('Не удалось подключиться к серверу. Проверьте, запущен ли XAMPP и работает ли Apache.');
+  }
+};
 
-    if (!formData.username || !formData.city || !formData.gender || !formData.age) {
-      setRegistrationMessage('Заполните все обязательные поля');
-      return;
-    }
-
-    try {
-      // Создаём FormData для отправки файлов и данных
-      const formDataToSend = new FormData();
-      formDataToSend.append('username', formData.username);
-      formDataToSend.append('email', formData.email);
-      formDataToSend.append('password', formData.password);
-      formDataToSend.append('city', formData.city);
-      formDataToSend.append('gender', formData.gender);
-      formDataToSend.append('age', formData.age);
-      formDataToSend.append('interests', formData.interests);
-      formDataToSend.append('about', formData.about);
-
-      // Добавляем файлы
-      selectedFiles.forEach(file => {
-        formDataToSend.append('photos', file);
-      });
-
-      const response = await fetch('http://localhost:3001/register', {
-        method: 'POST',
-        body: formDataToSend,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem('authToken', data.token);
-        setRegistrationMessage('');
-        alert(`Регистрация успешна! Добро пожаловать, ${formData.username}!`);
-      } else {
-        setRegistrationMessage('Ошибка при регистрации. Попробуйте ещё раз.');
-      }
-    } catch (error) {
-      console.error('Ошибка сети:', error);
-      setRegistrationMessage('Не удалось подключиться к серверу.');
-    }
-  };
 
   return (
     <div className="registration-form-container">
@@ -173,7 +182,7 @@ function RegistrationForm() {
             onChange={handleChange}
             required
           >
-            <option value="">Выберите пол</option>
+            {/* ✅ УБРАЛИ value="" */}
             <option value="male">Мужской</option>
             <option value="female">Женский</option>
             <option value="other">Другой</option>
@@ -231,7 +240,6 @@ function RegistrationForm() {
           <p className="hint">Можно загрузить несколько фото (JPG, PNG, WEBP)</p>
         </div>
 
-        {/* Галерея предпросмотра */}
         {previewImages.length > 0 && (
           <div className="gallery">
             <h4>Ваши фото:</h4>

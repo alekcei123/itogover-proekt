@@ -1,50 +1,60 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './LoginModal.css';
 
 const LoginModal = ({ isOpen, onClose, onLogin }) => {
   const [email, setEmail] = useState('');
-  const [city, setCity] = useState('');
+  const [password, setPassword] = useState(''); // <-- добавили пароль
   const [loginMessage, setLoginMessage] = useState('');
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  // Простая валидация
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    setLoginMessage('Пожалуйста, введите корректный email');
-    return;
-  }
-  if (!city) {
-    setLoginMessage('Пожалуйста, укажите город');
-    return;
-  }
-
-  try {
-    const response = await fetch('http://localhost./login.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, city }),
-    });
-
-    const result = await response.json();
-
-    if (result.success) {
-      setLoginMessage('Успешный вход!');
-      onLogin({ email, city }); // Передаём данные в родительский компонент
-      setTimeout(() => {
-        onClose(); // Закрываем модальное окно после успешного входа
-      }, 1500);
-    } else {
-      setLoginMessage(result.message || 'Ошибка при входе');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setLoginMessage('Пожалуйста, введите корректный email');
+      return;
     }
-  } catch (error) {
-    console.error('Ошибка сети:', error);
-    setLoginMessage('Не удалось подключиться к серверу');
-  }
-};
+    if (!password) {
+      setLoginMessage('Пожалуйста, укажите пароль');
+      return;
+    }
+
+    try {
+      // Важно: порт должен совпадать с тем, где запущен PHP-сервер
+      const response = await fetch('http://localhost:8000/login.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }), // <-- отправляем email + password
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setLoginMessage('Успешный вход!');
+        
+        // Сохраняем данные пользователя (если нужно для UI)
+        onLogin({ email }); 
+
+        // Переход на «Мой профиль» через 1.5 секунды
+        setTimeout(() => {
+          navigate('/profile'); // <-- путь к твоему компоненту «Мой профиль»
+        }, 1500);
+      } else {
+        setLoginMessage(result.message || 'Ошибка входа: неверный email или пароль');
+      }
+    } catch (error) {
+      console.error('Ошибка сети:', error);
+      setLoginMessage('Не удалось подключиться к серверу. Проверьте, запущен ли PHP-сервер.');
+    }
+  };
+
+  if (!isOpen) return null;
+
   return (
     <div className="modal-overlay">
       <div className="login-modal">
@@ -59,18 +69,22 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete="username"
             />
           </div>
+
           <div className="form-group">
-            <label htmlFor="city">Город:</label>
+            <label htmlFor="password">Пароль:</label>
             <input
-              type="text"
-              id="city"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="current-password"
             />
           </div>
+
           {loginMessage && <p className="error-message">{loginMessage}</p>}
           <button type="submit" className="login-btn">Войти</button>
         </form>
