@@ -13,7 +13,8 @@ export function TariffDetailPage() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch('http://localhost/tariffs.php');
+        // ✅ Используем прокси `/api`
+        const response = await fetch('/api/tariffs.php');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const text = await response.text();
@@ -24,7 +25,7 @@ export function TariffDetailPage() {
         const data = JSON.parse(text);
         if (!data.success) throw new Error(data.message || 'Ошибка сервера');
 
-        // ✅ ИСПРАВЛЕНИЕ: ищем в data.data, а не в data
+        // Ищем тариф по id в data.data
         const found = data.data?.find(
           (t) => String(t.id) === String(id)
         );
@@ -62,7 +63,9 @@ export function TariffDetailPage() {
           <li>Нет особенностей</li>
         )}
       </ul>
-      <button onClick={() => navigate('/tariffs')}>Назад к тарифам</button>
+      <a href="/tariffs" className="back-btn">
+        <span className="icon">←</span> Назад к тарифам
+      </a>
     </div>
   );
 }

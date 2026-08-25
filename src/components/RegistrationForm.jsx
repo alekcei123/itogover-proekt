@@ -8,7 +8,7 @@ function RegistrationForm() {
     password: '',
     confirmPassword: '',
     city: '',
-    gender: 'male', // ✅ Было '', стало 'male' по умолчанию
+    gender: 'male', 
     age: '',
     interests: '',
     about: ''
@@ -71,13 +71,11 @@ function RegistrationForm() {
 
     console.log('ОТПРАВЛЯЕМ НА СЕРВЕР:', payload);
 
-    const response = await fetch('http://localhost/register.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+    const response = await fetch('/api/register.php', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(payload),
+});
 
     // ✅ Читаем JSON ОДИН раз, сразу в переменную data
     const data = await response.json().catch(() => ({
@@ -107,7 +105,7 @@ function RegistrationForm() {
 
   return (
     <div className="registration-form-container">
-      <h2>Регистрация на Madagascar DATING SITE</h2>
+      <h2>Donskie Matches</h2>
       <form onSubmit={handleSubmit} className="registration-form">
         <div className="form-group">
           <label htmlFor="username">Имя пользователя *</label>

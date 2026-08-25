@@ -4,7 +4,7 @@ import './LoginModal.css';
 
 const LoginModal = ({ isOpen, onClose, onLogin }) => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState(''); // <-- добавили пароль
+  const [password, setPassword] = useState(''); 
   const [loginMessage, setLoginMessage] = useState('');
 
   const navigate = useNavigate();
@@ -23,13 +23,13 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
     }
 
     try {
-      // Важно: порт должен совпадать с тем, где запущен PHP-сервер
-      const response = await fetch('http://localhost:8000/login.php', {
+      // ✅ Используем относительный путь через прокси (как в регистрации)
+      const response = await fetch('/api/login.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }), // <-- отправляем email + password
+        body: JSON.stringify({ email, password }),
       });
 
       const result = await response.json();
@@ -37,19 +37,33 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
       if (result.success) {
         setLoginMessage('Успешный вход!');
         
-        // Сохраняем данные пользователя (если нужно для UI)
-        onLogin({ email }); 
+        // ИЗМЕНЕНИЕ 1: Получаем полный объект пользователя с бэкенда
+        const userData = result.user; 
+        
+        // ИЗМЕНЕНИЕ 2: Сохраняем пользователя в localStorage (чтобы другие компоненты знали его роль)
+        localStorage.setItem('user', JSON.stringify(userData));
 
-        // Переход на «Мой профиль» через 1.5 секунды
+        // ИЗМЕНЕНИЕ 3: Передаем наверх полный объект, а не только email
+        onLogin(userData); 
+
         setTimeout(() => {
-          navigate('/profile'); // <-- путь к твоему компоненту «Мой профиль»
+          // ИЗМЕНЕНИЕ 4: Динамический редирект в зависимости от роли
+          const role = userData?.role || 'user';
+          
+          if (role === 'developer') {
+            navigate('/developer'); // Панель разработчика
+          } else if (role === 'support') {
+            navigate('/support');   // Панель поддержки
+          } else {
+            navigate('/profile');   // Обычный пользователь (или замените на '/')
+          }
         }, 1500);
       } else {
         setLoginMessage(result.message || 'Ошибка входа: неверный email или пароль');
       }
     } catch (error) {
       console.error('Ошибка сети:', error);
-      setLoginMessage('Не удалось подключиться к серверу. Проверьте, запущен ли PHP-сервер.');
+      setLoginMessage('Не удалось подключиться к серверу. Проверьте, запущен ли Apache.');
     }
   };
 

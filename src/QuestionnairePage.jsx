@@ -1,4 +1,3 @@
-// src/pages/QuestionnairePage.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,65 +10,79 @@ const QuestionnairePage = () => {
     gender: 'other',
   });
   const [status, setStatus] = useState(null);
+  const [userId, setUserId] = useState(null);
   const navigate = useNavigate();
 
-  // При загрузке берём user из localStorage (результат login.php)
   useEffect(() => {
     const stored = localStorage.getItem('currentUser');
     if (!stored) {
-      navigate('/login'); // если нет авторизации — на логин
+      navigate('/login');
       return;
     }
     const user = JSON.parse(stored);
-    // Если у пользователя уже есть анкета — загружаем её (опционально)
-    fetch(`http://localhost/get_profile.php?user_id=${user.id}`, { method: 'GET' })
+    setUserId(user.id); 
+
+    // Загружаем существующую анкету (если есть)
+    fetch(`/api/get_profile.php?user_id=${user.id}`)
       .then(r => r.json())
       .then(data => {
         if (data.success && data.profile) {
           setFormData(data.profile);
         }
       })
-      .catch(() => {}); // если анкеты ещё нет — оставляем форму пустой
+      .catch(() => {});
   }, [navigate]);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  // Для теста жёстко ставим user_id = 1. Позже замени на получение из localStorage/сессии
-  const payload = {
-    user_id: 1, 
-    city: formData.city,
-    age: parseInt(formData.age) || 0,
-    interests: formData.interests,
-    about: formData.about,
-    gender: formData.gender,
-  };
-
-  try {
-    const res = await fetch('http://localhost/save_profile.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json', // Обязательно
-      },
-      body: JSON.stringify(payload), // Обязательно
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      console.error('Server error:', data);
-      alert('Ошибка: ' + (data.debug_message || data.error));
+    if (!userId) {
+      alert('Ошибка: пользователь не авторизован');
       return;
     }
 
-    console.log('Success:', data);
-    alert('Анкета сохранена!');
-    // Тут можно редирект или сброс формы
-  } catch (err) {
-    console.error('Fetch error:', err);
-    alert('Ошибка сети: проверь, запущен ли XAMPP и доступен ли localhost');
-  }
-};
+    const payload = {
+      user_id: userId, // ✅ теперь реальный ID
+      city: formData.city,
+      age: parseInt(formData.age) || 0,
+      interests: formData.interests,
+      about: formData.about,
+      gender: formData.gender,
+    };
+
+    setStatus('saving');
+
+    try {
+      // ✅ Используем прокси
+      const res = await fetch('/api/save_profile.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error('Server error:', data);
+        alert('Ошибка: ' + (data.debug_message || data.error || 'Неизвестная ошибка'));
+        setStatus(null);
+        return;
+      }
+
+      console.log('Success:', data);
+      alert('Анкета сохранена!');
+      setStatus(null);
+      // Можно перенаправить на профиль
+      navigate('/profile');
+    } catch (err) {
+      console.error('Fetch error:', err);
+      alert('Ошибка сети: проверь, запущен ли XAMPP и доступен ли localhost');
+      setStatus(null);
+    }
+  };
+
   return (
     <div style={{ maxWidth: '600px', margin: '40px auto', padding: '20px', border: '1px solid #ddd', borderRadius: '8px' }}>
       <h2>{formData.city || formData.about ? 'Редактировать анкету' : 'Заполните анкету'}</h2>
