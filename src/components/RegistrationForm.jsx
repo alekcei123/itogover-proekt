@@ -8,14 +8,18 @@ function RegistrationForm() {
     password: '',
     confirmPassword: '',
     city: '',
-    gender: 'male', 
+    gender: 'male',
     age: '',
+    education: '',
     interests: '',
     about: ''
   });
   const [registrationMessage, setRegistrationMessage] = useState('');
   const [previewImages, setPreviewImages] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [honeypot, setHoneypot] = useState('');
+  // 1. Добавляем состояние для чекбокса
+  const [agreement, setAgreement] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -33,82 +37,127 @@ function RegistrationForm() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  // Простая валидация на клиенте
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(formData.email)) {
-    setRegistrationMessage('Пожалуйста, введите корректный email');
-    return;
-  }
-  if (formData.password !== formData.confirmPassword) {
-    setRegistrationMessage('Пароли не совпадают');
-    return;
-  }
-  if (formData.password.length < 6) {
-    setRegistrationMessage('Пароль должен содержать минимум 6 символов');
-    return;
-  }
-  if (!formData.username || !formData.city || !formData.gender || !formData.age) {
-    setRegistrationMessage('Заполните все обязательные поля');
-    return;
-  }
-
-  try {
-    // Формируем payload — здесь age никогда не будет NaN
-    const ageValue = formData.age ? parseInt(formData.age, 10) : 0;
-    
-    const payload = {
-      username: formData.username.trim(),
-      email: formData.email.trim(),
-      password: formData.password,
-      city: formData.city.trim(),
-      gender: formData.gender,
-      age: ageValue, // ✅ число или 0
-      interests: formData.interests.trim(),
-      about: formData.about.trim(),
-    };
-
-    console.log('ОТПРАВЛЯЕМ НА СЕРВЕР:', payload);
-
-    const response = await fetch('http://localhost/register.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-
-  
-    const data = await response.json().catch(() => ({
-      success: false,
-      message: 'Не удалось прочитать ответ сервера (невалидный JSON)'
-    }));
-
-    console.log('ОТВЕТ ОТ PHP:', data);
-
-    
-    if (!data.success) {
-      setRegistrationMessage(data.message || 'Ошибка регистрации');
+    // --- АНТИСПАМ ---
+    if (honeypot) {
+      setRegistrationMessage('Ваша заявка отклонена антиспам-системой.');
       return;
     }
 
-    
-    localStorage.setItem('authToken', data.token);
-    setRegistrationMessage('');
-    alert(`Регистрация успешна! Добро пожаловать, ${formData.username}!`);
+    // 2. Добавляем проверку согласия
+    if (!agreement) {
+      setRegistrationMessage('Для регистрации необходимо согласие на обработку персональных данных');
+      return;
+    }
 
-  } catch (error) {
-    console.error('Ошибка сети (fetch):', error);
-    setRegistrationMessage('Не удалось подключиться к серверу. Проверьте, запущен ли XAMPP и работает ли Apache.');
-  }
-};
+    // --- ВАЛИДАЦИЯ ---
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setRegistrationMessage('Пожалуйста, введите корректный email');
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setRegistrationMessage('Пароли не совпадают');
+      return;
+    }
+    if (formData.password.length < 8) {
+      setRegistrationMessage('Пароль должен содержать минимум 8 символов');
+      return;
+    }
+    if (!/\d/.test(formData.password) || !/[a-zA-Z]/.test(formData.password)) {
+      setRegistrationMessage('Пароль должен содержать хотя бы одну цифру и одну букву');
+      return;
+    }
+    if (!formData.username.trim() || !formData.city.trim() || !formData.gender || !formData.age) {
+      setRegistrationMessage('Заполните все обязательные поля');
+      return;
+    }
+    const ageNum = parseInt(formData.age, 10);
+    if (isNaN(ageNum) || ageNum < 18 || ageNum > 99) {
+      setRegistrationMessage('Возраст должен быть числом от 18 до 99');
+      return;
+    }
 
+    try {
+      // 1. Создаем FormData (вместо JSON)!
+      const formDataToSend = new FormData();
+      formDataToSend.append('username', formData.username.trim());
+      formDataToSend.append('email', formData.email.trim());
+      formDataToSend.append('password', formData.password);
+      formDataToSend.append('city', formData.city.trim());
+      formDataToSend.append('gender', formData.gender);
+      formDataToSend.append('age', ageNum);
+      formDataToSend.append('education', formData.education.trim());
+      formDataToSend.append('interests', formData.interests.trim());
+      formDataToSend.append('about', formData.about.trim());
+      // Передаем согласие на сервер
+      formDataToSend.append('agreement', agreement ? '1' : '0');
+
+      // 2. Добавляем файлы (фото) прямо в этот же FormData
+      if (selectedFiles.length > 0) {
+        selectedFiles.forEach((file) => {
+          formDataToSend.append('photos[]', file);
+        });
+      }
+
+      // 3. Отправляем ОДИН запрос в register.php
+      const response = await fetch('/api/register.php', {
+        method: 'POST',
+        body: formDataToSend, 
+      });
+
+      const data = await response.json().catch(() => ({
+        success: false,
+        message: 'Не удалось прочитать ответ сервера (невалидный JSON)'
+      }));
+
+      if (!data.success) {
+        setRegistrationMessage(data.message || 'Ошибка регистрации');
+        return;
+      }
+
+      // 4. Успешное завершение
+      localStorage.setItem('authToken', data.token);
+      setRegistrationMessage('');
+      alert(`Регистрация успешна! Добро пожаловать, ${formData.username}!`);
+
+      // Очистка формы (добавляем сброс чекбокса)
+      setFormData({
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        city: '',
+        gender: 'male',
+        age: '',
+        education: '',
+        interests: '',
+        about: ''
+      });
+      setAgreement(false); // Сбрасываем согласие
+      setPreviewImages([]);
+      setSelectedFiles([]);
+
+    } catch (error) {
+      console.error('Ошибка сети (fetch):', error);
+      setRegistrationMessage('Не удалось подключиться к серверу. Проверьте, запущен ли XAMPP и работает ли Apache.');
+    }
+  };
 
   return (
     <div className="registration-form-container">
-      <h2>Регистрация на Madagascar DATING SITE</h2>
+      <h2>Donskie Matches</h2>
       <form onSubmit={handleSubmit} className="registration-form">
+        <input
+          type="text"
+          name="honeypot"
+          style={{ display: 'none' }}
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+        />
+
+        {/* Остальные поля без изменений */}
         <div className="form-group">
           <label htmlFor="username">Имя пользователя *</label>
           <input
@@ -143,7 +192,7 @@ function RegistrationForm() {
             name="password"
             value={formData.password}
             onChange={handleChange}
-            placeholder="Минимум 6 символов"
+            placeholder="Минимум 8 символов, цифра и буква"
             required
           />
         </div>
@@ -182,7 +231,6 @@ function RegistrationForm() {
             onChange={handleChange}
             required
           >
-            {/* ✅ УБРАЛИ value="" */}
             <option value="male">Мужской</option>
             <option value="female">Женский</option>
             <option value="other">Другой</option>
@@ -201,6 +249,23 @@ function RegistrationForm() {
             max="99"
             required
           />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="education">Образование</label>
+          <select
+            id="education"
+            name="education"
+            value={formData.education}
+            onChange={handleChange}
+          >
+            <option value="">Выберите</option>
+            <option value="Среднее">Среднее</option>
+            <option value="Среднее специальное">Среднее специальное</option>
+            <option value="Высшее (бакалавр)">Высшее (бакалавр)</option>
+            <option value="Высшее (магистр)">Высшее (магистр)</option>
+            <option value="Учёная степень">Учёная степень</option>
+          </select>
         </div>
 
         <div className="form-group">
@@ -238,6 +303,19 @@ function RegistrationForm() {
             onChange={handleFileChange}
           />
           <p className="hint">Можно загрузить несколько фото (JPG, PNG, WEBP)</p>
+        </div>
+
+        {/* 3. Добавляем чекбокс перед кнопкой */}
+        <div className="form-group">
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={agreement}
+              onChange={(e) => setAgreement(e.target.checked)}
+              required
+            />
+            <span> Я согласен на обработку персональных данных</span>
+          </label>
         </div>
 
         {previewImages.length > 0 && (

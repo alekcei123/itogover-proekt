@@ -238,6 +238,7 @@ body {
 }
 
 /* Подвал */
+/* Ваша структура (оставляем как есть) */
 .main-footer {
   background: #333;
   color: white;
@@ -264,6 +265,7 @@ body {
   color: #e74c3c;
 }
 
+/* --- УЛУЧШЕННЫЕ ССЫЛКИ --- */
 .footer-nav a,
 .footer-contacts a,
 .footer-social a {
@@ -271,14 +273,39 @@ body {
   color: #ddd;
   text-decoration: none;
   margin-bottom: 0.5rem;
-  transition: color 0.3s ease;
+  padding-left: 0;
+  position: relative;
+  transition: all 0.3s ease; /* Плавность всех изменений */
 }
 
+/* Эффект при наведении: цвет + сдвиг вправо */
 .footer-nav a:hover,
 .footer-contacts a:hover,
 .footer-social a:hover {
   color: #e74c3c;
+  padding-left: 10px; /* Сдвиг вправо */
 }
+
+/* Красивая стрелочка, которая появляется слева */
+.footer-nav a::before,
+.footer-contacts a::before,
+.footer-social a::before {
+  content: '→';
+  position: absolute;
+  left: -20px;
+  opacity: 0;
+  color: #e74c3c;
+  transition: opacity 0.3s ease, left 0.3s ease;
+}
+
+.footer-nav a:hover::before,
+.footer-contacts a:hover::before,
+.footer-social a:hover::before {
+  opacity: 1;
+  left: 0;
+}
+
+/* --- КОНЕЦ УЛУЧШЕННЫХ ССЫЛОК --- */
 
 .footer-bottom {
   text-align: center;
@@ -286,6 +313,39 @@ body {
   border-top: 1px solid #444;
   color: #aaa;
 }
+footer-bottom .legal-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px; /* Расстояние между элементами */
+    flex-wrap: wrap;
+}
+
+.footer-bottom .legal-links a {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    
+    color: #aaa !important; /* Светло-серый цвет текста */
+    text-decoration: underline !important; /* Подчеркивание */
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.footer-bottom .legal-links a:hover {
+    color: #e74c3c !important; /* Красный при наведении */
+    text-decoration: none !important;
+}
+
+.footer-bottom .legal-links span {
+    color: #aaa; /* Разделитель | */
+    font-size: 14px;
+}
+
+
+
 
 
 .header-flex {
@@ -307,19 +367,43 @@ body {
   font-size: 14px;
 }
 
-.login-form button {
-  padding: 8px 16px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
+
+header-login-btn, 
+button[type="submit"]:contains("Войти") { 
+  /* Убираем стандартные браузерные стили */
+  background: linear-gradient(145deg, #ff4757, #d63031);
+  color: white !important;
+  border: none !important;
+  
+  /* ГЛАВНОЕ: большие внутренние отступы для размера */
+  padding: 16px 32px; /* Чуть меньше, чем в модалке, чтобы не ломать шапку, но всё равно крупно */
+  
+  border-radius: 50px; /* Скругление */
+  font-size: 14px;     /* В шапке шрифт может быть меньше, чем в модалке */
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  font-size: 14px;
+  
+  /* Тень для объема */
+  box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+  transition: all 0.3s ease;
+  
+  /* Убираем лишние отступы, если они есть у родителя */
+  margin: 0; 
 }
 
-.login-form button:hover {
-  background-color: #0056b3;
+.header-login-btn:hover,
+button[type="submit"]:contains("Войти"):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(255, 71, 87, 0.45);
+  background: linear-gradient(145deg, #ff6b6b, #c0392b);
 }
+
+.header-login-btn:active {
+  transform: translateY(1px);
+}
+
 
 .error-message {
   color: red;
@@ -409,10 +493,9 @@ body {
 
 .tariff-container {
   max-width: 1000px;
-  margin: 0 auto;
-  padding: 60px 20px;       
+  margin: 40px auto 0;   /* сверху 40px, по центру, снизу 0 */
+  padding: 60px 20px;
 }
-
 .tariffs-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -441,6 +524,21 @@ body {
   margin: 0 0 8px 0;
   font-size: 1.2rem;
 }
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: #fff;
+  color: #333;
+  text-decoration: none;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+.back-btn:hover {
+  background: #f5f5f5;
+}
+
 
 .price {
   margin: 4px 0 0 0;
@@ -482,4 +580,258 @@ body {
 .error-message {
   color: #dc3545;
   margin-top: 10px;
+}
+
+/* --- 1. Оставляем без изменений (Контейнер и индикаторы) --- */
+.slideshow-container {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  margin: 2rem auto;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background-color: #fff; /* Чистый белый фон для контейнера */
+}
+
+.indicators {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator.active {
+  background-color: #fff;
+  transform: scale(1.2);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+}
+
+/* --- 2. ПЕРЕПИСЫВАЕМ стили для .slide --- */
+/* Теперь слайд — это просто обертка для flex-карточки, а не блок с картинкой на весь экран */
+.slide {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 400px; /* Фиксируем минимальную высоту, чтобы блок не схлопывался */
+  padding: 1rem;
+  box-sizing: border-box;
+  background-color: #fff;
+  position: relative;
+}
+
+/* Убираем старые стили для картинки внутри .slide, так как теперь она внутри .story-image */
+.slide img {
+  display: none; /* Скрываем, если вдруг где-то остался старый img внутри .slide */
+}
+
+/* --- 3. УДАЛЯЕМ стили для .slide-overlay --- */
+/* Мы больше не накладываем текст на картинку, поэтому эти стили не нужны.
+   Если они останутся, они могут создавать черные полосы или наложения. */
+/* .slide-overlay { ... } <- УДАЛИТЬ ИЛИ ЗАКОММЕНТИРОВАТЬ */
+
+/* --- 4. ДОБАВЛЯЕМ новые стили для новой структуры --- */
+
+/* Карточка истории */
+.story-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  gap: 2rem;
+}
+
+/* Блок с изображением */
+.story-image {
+  flex: 1;
+  min-width: 280px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.story-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Идеальное заполнение блока без искажений */
+  display: block;
+  transition: transform 0.6s ease;
+}
+
+/* Эффект зума для фото в новой верстке */
+.slide.active .story-image img {
+  transform: scale(1.05);
+}
+
+/* Блок с текстом */
+.story-content {
+  flex: 1;
+  min-width: 280px;
+  text-align: left;
+  color: #333;
+  padding-left: 1rem;
+}
+
+.tagline {
+  display: block;
+  color: #ffd700; /* Золотой акцент */
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  text-shadow: none; /* Убираем тень, так как фон теперь светлый */
+}
+
+.story-content h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  color: #2c3e50;
+  line-height: 1.2;
+}
+
+.meta {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  text-shadow: none;
+}
+
+/* Контейнер главной страницы */
+.home-page-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+/* Стили для секции рекомендаций */
+.matches-section {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.matches-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.matches-header h2 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.matches-header p {
+  margin: 0;
+  color: #666;
+}
+
+/* Сетка карточек */
+.matches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+/* Состояния загрузки и пустоты */
+.loading-state, .empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+/* Стили для слайдера */
+.slideshow-container {
+  position: relative;
+  max-width: 1000px;
+  margin: 20px auto;
+}
+
+.story-card {
+  display: flex;
+  gap: 20px;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.story-image img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 8px;
+  min-width: 300px;
+}
+
+.indicators {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.indicator {
+  width: 12px;
+  height: 12px;
+  background: #ccc;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.indicator.active {
+  background: #3b82f6;
+}
+
+
+/* --- 5. АДАПТИВНОСТЬ (Обязательно для мобильных) --- */
+@media (max-width: 768px) {
+  .slide {
+    min-height: auto;
+    padding: 1rem;
+  }
+
+  .story-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .story-image {
+    width: 100%;
+    max-width: 350px;
+    height: 250px; /* Фиксированная высота на мобильном */
+    border-radius: 12px;
+  }
+
+  .story-content {
+    text-align: center;
+    padding-left: 0;
+    max-width: 400px;
+  }
+  
+  .tagline {
+    text-align: center;
+  }
 }

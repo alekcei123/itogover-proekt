@@ -23,13 +23,13 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
     }
 
     try {
-      
-      const response = await fetch('http://localhost:8000/login.php', {
+      // Используем относительный путь через прокси (как в регистрации)
+      const response = await fetch('/api/login.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }), 
+        body: JSON.stringify({ email, password }),
       });
 
       const result = await response.json();
@@ -37,19 +37,33 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
       if (result.success) {
         setLoginMessage('Успешный вход!');
         
+        // Получаем полный объект пользователя с бэкенда
+        const userData = result.user; 
         
-        onLogin({ email }); 
+        // Сохраняем пользователя в localStorage (чтобы другие компоненты знали его роль)
+        localStorage.setItem('user', JSON.stringify(userData));
 
-        
+        // Передаем наверх полный объект, а не только email
+        onLogin(userData); 
+
         setTimeout(() => {
-          navigate('/profile'); 
+          // Динамический редирект в зависимости от роли
+          const role = userData?.role || 'user';
+          
+          if (role === 'developer') {
+            navigate('/developer'); // Панель разработчика
+          } else if (role === 'support') {
+            navigate('/support');   // Панель поддержки
+          } else {
+            navigate('/profile');   // Обычный пользователь
+          }
         }, 1500);
       } else {
         setLoginMessage(result.message || 'Ошибка входа: неверный email или пароль');
       }
     } catch (error) {
       console.error('Ошибка сети:', error);
-      setLoginMessage('Не удалось подключиться к серверу. Проверьте, запущен ли PHP-сервер.');
+      setLoginMessage('Не удалось подключиться к серверу. Проверьте, запущен ли Apache.');
     }
   };
 

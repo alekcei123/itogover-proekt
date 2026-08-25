@@ -1,0 +1,48 @@
+// src/couplesData.js
+export const couplesData = [
+  {
+    id: 1,
+    name: 'Игорь и Алина',
+    tagline: 'Квесты и Шерлок — вот их формула счастья',
+    year: 2010,
+    meetingPlace: 'на квест‑хоре',
+    description: 'Часто ходят на разные квесты, обожают фильмы про Шерлока Холмса',
+    image: '/assets/happy-couple-love-mountains_289836-193.avif',
+  },
+  {
+    id: 2,
+    name: 'Степан и Люба',
+    tagline: 'Баста и Ростов — их главные чувства',
+    year: 2008,
+    meetingPlace: 'на концерте Басты',
+    description: 'Оба ярые фанаты Николая Вакуленко и любят свой город (Ростов‑на‑Дону)',
+    image: '/assets/3e01cbbf2d48c583d5ae9a24e3fdc4af.jpg',
+  },
+  {
+    id: 3,
+    name: 'Андрей и Ирина',
+    tagline: 'Искусство и музыка — их общий язык',
+    year: 2020,
+    meetingPlace: 'оба творческой профессии',
+    description: 'Андрей — художник, Ирина поёт в хоре. Оба горят своей мечтой и идут к ней.',
+    image: '/assets/7aa293b0d8266a5301e75094a34cc478.jpg',
+  },
+  {
+    id: 4,
+    name: 'Егор и Дарья',
+    tagline: 'Музыка их связала — и крепко держит',
+    year: 2025,
+    meetingPlace: 'оба любят музыку',
+    description: 'Егор музыкальный продюсер, Дарья играет в рок‑группе',
+    image: '/assets/beautiful-couple-spend-time-summer-park_1157-22870.avif',
+  },
+  {
+    id: 5,
+    name: 'Алексей и Света',
+    tagline: 'Горы — их способ быть ближе друг к другу',
+    year: 2018,
+    meetingPlace: 'любят горы',
+    description: 'Ходили на Эверест, поднимались на Приэльбрусье',
+    image: '/assets/825f959a3d3aa77ff21a846676366be8.jpg',
+  },
+];
