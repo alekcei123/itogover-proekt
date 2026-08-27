@@ -18,7 +18,7 @@ function RegistrationForm() {
   const [previewImages, setPreviewImages] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [honeypot, setHoneypot] = useState('');
-  // 1. Добавляем состояние для чекбокса
+  // Состояние для чекбокса
   const [agreement, setAgreement] = useState(false);
 
   const handleChange = (e) => {
@@ -45,7 +45,7 @@ function RegistrationForm() {
       return;
     }
 
-    // 2. Добавляем проверку согласия
+    // --- Проверка согласия ---
     if (!agreement) {
       setRegistrationMessage('Для регистрации необходимо согласие на обработку персональных данных');
       return;
@@ -80,7 +80,7 @@ function RegistrationForm() {
     }
 
     try {
-      // 1. Создаем FormData (вместо JSON)!
+      // Создаем FormData (вместо JSON)!
       const formDataToSend = new FormData();
       formDataToSend.append('username', formData.username.trim());
       formDataToSend.append('email', formData.email.trim());
@@ -94,14 +94,14 @@ function RegistrationForm() {
       // Передаем согласие на сервер
       formDataToSend.append('agreement', agreement ? '1' : '0');
 
-      // 2. Добавляем файлы (фото) прямо в этот же FormData
+      // Добавляем файлы (фото) прямо в этот же FormData
       if (selectedFiles.length > 0) {
         selectedFiles.forEach((file) => {
           formDataToSend.append('photos[]', file);
         });
       }
 
-      // 3. Отправляем ОДИН запрос в register.php
+      // Отправляем ОДИН запрос в register.php (без заголовка Content-Type!)
       const response = await fetch('/api/register.php', {
         method: 'POST',
         body: formDataToSend, 
@@ -117,12 +117,12 @@ function RegistrationForm() {
         return;
       }
 
-      // 4. Успешное завершение
+      // Успешное завершение
       localStorage.setItem('authToken', data.token);
       setRegistrationMessage('');
       alert(`Регистрация успешна! Добро пожаловать, ${formData.username}!`);
 
-      // Очистка формы (добавляем сброс чекбокса)
+      // Очистка формы
       setFormData({
         username: '',
         email: '',
@@ -135,7 +135,7 @@ function RegistrationForm() {
         interests: '',
         about: ''
       });
-      setAgreement(false); // Сбрасываем согласие
+      setAgreement(false);
       setPreviewImages([]);
       setSelectedFiles([]);
 
@@ -157,7 +157,7 @@ function RegistrationForm() {
           onChange={(e) => setHoneypot(e.target.value)}
         />
 
-        {/* Остальные поля без изменений */}
+        {/* Остальные поля */}
         <div className="form-group">
           <label htmlFor="username">Имя пользователя *</label>
           <input
@@ -305,7 +305,7 @@ function RegistrationForm() {
           <p className="hint">Можно загрузить несколько фото (JPG, PNG, WEBP)</p>
         </div>
 
-        {/* 3. Добавляем чекбокс перед кнопкой */}
+        {/* Чекбокс согласия */}
         <div className="form-group">
           <label className="checkbox-label">
             <input

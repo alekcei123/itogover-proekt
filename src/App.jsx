@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Routes, Route, Link, Navigate } from 'react-router-dom';
 import './App.css';
 
-// Существующие компоненты (не меняем)
+// Существующие компоненты
 import RegistrationForm from './components/RegistrationForm';
 import HomePage from './components/HomePage';
 import { TariffsPage } from './TariffsPage';
@@ -17,13 +17,11 @@ import SearchPage from './SearchPage';
 import SupportPanel from './components/SupportPanel';
 import DevPanel from './components/DevPanel';
 
-// НОВЫЕ СТРАНИЦЫ (добавлены по заданию)
+// НОВЫЕ СТРАНИЦЫ
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { TermsOfService } from './pages/TermsOfService';
 import { AboutPage } from './pages/AboutPage';
 import { ContactsPage } from './pages/ContactsPage';
-// (опционально) страница входа, если нужна отдельная
-// import LoginPage from './pages/LoginPage';
 
 // Компонент защиты маршрутов
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -103,9 +101,11 @@ function App() {
               <li><Link to='/' className='nav-link'>Главная</Link></li>
               {!currentUser && <li><Link to='/registration' className='nav-link'>Регистрация</Link></li>}
               <li><Link to='/tariffs' className='nav-link'>Тарифы</Link></li>
-              {/* Новые ссылки для всех пользователей */}
+              
+              {/* Новые ссылки */}
               <li><Link to='/about' className='nav-link'>О нас</Link></li>
               <li><Link to='/contacts' className='nav-link'>Контакты</Link></li>
+              
               {(currentUser?.role === 'user' || currentUser?.role === 'support' || currentUser?.role === 'developer') && (
                 <>
                   <li><Link to='/chat' className='nav-link'>💬 Сообщения</Link></li>
@@ -151,7 +151,7 @@ function App() {
           <Route path="/chat/:userId" element={<ChatWindow />} />
           <Route path="/search" element={<SearchPage />} />
 
-          {/* ЗАЩИЩЁННЫЕ МАРШРУТЫ */}
+          {/* Защищенные маршруты */}
           <Route path="/support" element={
             <ProtectedRoute allowedRoles={['support', 'developer']}>
               <SupportPanel />
@@ -163,14 +163,11 @@ function App() {
             </ProtectedRoute>
           } />
 
-          {/* НОВЫЕ СТРАНИЦЫ ПО ЗАДАНИЮ */}
+          {/* Новые страницы по заданию */}
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contacts" element={<ContactsPage />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
-
-          {/* Если нужна отдельная страница входа, раскомментировать:
-          <Route path="/login" element={<LoginPage />} /> */}
 
           <Route path='*' element={<Navigate to='/' replace />} />
         </Routes>
@@ -190,6 +187,7 @@ function App() {
               <Link to='/chat' className='nav-link'>💬 Сообщения</Link>
               <Link to='/search' className='nav-link'>🔍 Поиск</Link>
               {!currentUser && <Link to='/login' className='nav-link'>Войти</Link>}
+              
               {/* Новые ссылки в подвале */}
               <Link to='/about' className='nav-link'>О нас</Link>
               <Link to='/contacts' className='nav-link'>Контакты</Link>
@@ -205,8 +203,8 @@ function App() {
               <a href='#' aria-label='VK'>VK</a>
             </div>
           </div>
+          
           <div className='footer-bottom'>
-            
             <div className="legal-links">
               <Link to="/privacy">Политика конфиденциальности</Link>
               <span>|</span>
@@ -214,8 +212,8 @@ function App() {
               <span>|</span>
               <Link to="/contacts">Связаться с нами</Link>
             </div>
-            
           </div>
+          
         </div>
       </footer>
     </div>

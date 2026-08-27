@@ -22,10 +22,13 @@ export function TariffsPage() {
       const response = await fetch('/api/tariffs.php', { method: 'GET', headers: { 'Content-Type': 'application/json' } });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const text = await response.text();
+      
+      // Оставлена ваша подробная версия с логированием
       if (text.trim().startsWith('<')) {
         console.error('Сервер вернул HTML вместо JSON:', text);
         throw new Error('Сервер вернул HTML вместо JSON. Проверьте URL и логи PHP.');
       }
+      
       const data = JSON.parse(text);
       if (!data.success) throw new Error(data.message || 'Ошибка на стороне сервера');
       setTariffs(data.data || []);
@@ -97,7 +100,7 @@ export function TariffsPage() {
                   {tariff.price == 0 ? (
                     <span className="badge">Бесплатно</span>
                   ) : (
-                    <p className="price">{tariff.price} ₽ / {tariff.duration}</p>
+                    <p className="price">{tariff.price} ₽ / {tariff.duration}</p>
                   )}
                 </div>
                 <ul className="features-list">
